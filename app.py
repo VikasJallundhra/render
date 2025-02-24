@@ -28,7 +28,7 @@ def download_video():
 
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo[ext=mp4][height>=2160]+bestaudio[ext=m4a]/best',  # Best quality video & audio
+            'format': 'bv*+ba/best',  # Best quality video & audio
             'merge_output_format': 'mp4',  # Ensure MP4 format
             'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
         }
