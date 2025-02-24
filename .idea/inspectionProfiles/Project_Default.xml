@@ -1,0 +1,31 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="4">
+            <item index="0" class="java.lang.String" itemvalue="chromadb" />
+            <item index="1" class="java.lang.String" itemvalue="google-generativeai" />
+            <item index="2" class="java.lang.String" itemvalue="faiss-cpu" />
+            <item index="3" class="java.lang.String" itemvalue="langchain" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="main.flask" />
+          <option value="main.headres" />
+          <option value="main.webdriver_manager" />
+          <option value="pywhatkit" />
+          <option value="App.chromedriver_autoinstaller" />
+          <option value="App2.instagram_private_api" />
+          <option value="tkinter.tk" />
+          <option value="tkinter.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
