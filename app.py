@@ -28,21 +28,9 @@ def download_video():
 
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo[ext=mp4][height>=2160]+bestaudio[ext=m4a]/best',  # Force best quality
+            'format': 'bestvideo[ext=mp4][height>=2160]+bestaudio[ext=m4a]/best',  # Best quality video & audio
             'merge_output_format': 'mp4',  # Ensure MP4 format
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',  # Convert only if necessary
-            }],
-            'postprocessor_args': [
-                '-c:v', 'copy',  # Copy video without re-encoding
-                '-c:a', 'aac', '-b:a', '320k'  # Ensure high-quality audio
-            ],
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,
-            'noplaylist': True,  # Prevent downloading entire playlists
-            'no-check-certificate': True,  # Avoid SSL issues
-            'no-mtime': True,  # Avoid modifying file metadata
-            'progress_hooks': [lambda d: print(d.get('status'))],  # Debugging info
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
