@@ -12,6 +12,10 @@ DOWNLOAD_FOLDER = "downloads"
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
 
+# Function to merge video and audio using FFmpeg
+def merge_video_audio(video_path, audio_path, output_path):
+    os.system(f'ffmpeg -i "{video_path}" -i "{audio_path}" -c:v copy -c:a aac "{output_path}"')
+
 @app.route('/download', methods=['POST'])
 def download_video():
     data = request.json
@@ -21,26 +25,24 @@ def download_video():
         return jsonify({"error": "URL is required"}), 400
 
     try:
-        # Generate a unique filename
-        unique_id = str(uuid.uuid4())[:8]  # Short unique identifier
-        filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
+        unique_id = str(uuid.uuid4())[:8]  # Generate unique ID for filename
+        video_path = f"{DOWNLOAD_FOLDER}/video-{unique_id}.mp4"
+        audio_path = f"{DOWNLOAD_FOLDER}/audio-{unique_id}.m4a"
+        output_path = f"{DOWNLOAD_FOLDER}/final-{unique_id}.mp4"
 
-        # yt-dlp options with cookies
-        ydl_opts = {
-            'outtmpl': filename_template,  # Save format
-            'format': 'best[ext=mp4]/best',
-            'postprocessors': [],
-            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
-        }
+        # Download best video (without audio)
+        with yt_dlp.YoutubeDL({'format': 'bestvideo[ext=mp4]', 'outtmpl': video_path}) as ydl:
+            ydl.download([url])
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info_dict)
+        # Download best audio
+        with yt_dlp.YoutubeDL({'format': 'bestaudio[ext=m4a]', 'outtmpl': audio_path}) as ydl:
+            ydl.download([url])
 
-        # Extract filename from path
-        filename_only = os.path.basename(filename)
+        # Merge video and audio using FFmpeg
+        merge_video_audio(video_path, audio_path, output_path)
 
-        # Generate a unique downloadable URL
+        # Generate download URL
+        filename_only = os.path.basename(output_path)
         download_url = url_for('get_video', filename=filename_only, _external=True)
 
         return jsonify({"message": "Download successful", "download_url": download_url})
