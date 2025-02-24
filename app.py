@@ -28,15 +28,11 @@ def download_video():
 
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo+bestaudio/best',  # Ensure best video and audio are merged
-            'merge_output_format': 'mp4',  # Merge output as MP4
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',  # Convert to MP4 if necessary
-            }],
-            'postprocessor_args': ['-c:v', 'copy', '-c:a', 'aac'],  # Ensure proper audio encoding
-            'cookiesfrombrowser': ('chrome',)  # Use Chrome cookies to handle restricted content
+            'format': 'best[ext=mp4]/best',
+            'postprocessors': [],
+            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
+
 
         
 
