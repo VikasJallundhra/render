@@ -7,7 +7,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Directory to store downloaded videos
 DOWNLOAD_FOLDER = "downloads"
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
@@ -20,27 +19,30 @@ def download_video():
     if not url:
         return jsonify({"error": "URL is required"}), 400
 
+    if "youtube.com" not in url and "youtu.be" not in url:
+        return jsonify({"error": "Invalid YouTube URL"}), 400
+
     try:
-        # Generate a unique filename
-        unique_id = str(uuid.uuid4())[:8]  # Short unique identifier
+        unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        # yt-dlp options with cookies
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'best[ext=mp4]/best',
-            'postprocessors': [],
-            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
+            'format': 'bv*+ba/best',  # Best quality video & audio
+            'merge_output_format': 'mp4',  # Ensure MP4 format
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
-            filename = ydl.prepare_filename(info_dict)
+            
+            # Extract the best available filename
+            if 'requested_downloads' in info_dict:
+                filename = info_dict['requested_downloads'][0]['filepath']
+            else:
+                filename = ydl.prepare_filename(info_dict)
 
-        # Extract filename from path
         filename_only = os.path.basename(filename)
-
-        # Generate a unique downloadable URL
         download_url = url_for('get_video', filename=filename_only, _external=True)
 
         return jsonify({"message": "Download successful", "download_url": download_url})
