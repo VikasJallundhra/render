@@ -29,7 +29,7 @@ def download_video():
          # yt-dlp options with cookies
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'best[ext=mp4]/best',
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
             'postprocessors': [],
             'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
