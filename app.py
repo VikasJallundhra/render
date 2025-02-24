@@ -23,24 +23,26 @@ def download_video():
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        # yt-dlp options (supports all sites)
+        # yt-dlp options (supports all platforms)
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',  # Best video & audio
-            'merge_output_format': 'mp4',  # Ensure MP4 output
-            'postprocessors': [{'key': 'FFmpegMerger'}],  # Merge video & audio
+            'format': 'bv+ba/best[ext=mp4]',  # Best video + audio merged
+            'merge_output_format': 'mp4',  # Ensure MP4 format
+            'postprocessors': [{
+                'key': 'FFmpegMerger',  # Ensure merging of video & audio
+                'when': 'downloading'
+            }],
             'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,  # Use cookies if available
-            'noplaylist': True  # Prevent downloading full playlists
+            'noplaylist': True  # Prevent full playlist downloads
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
 
-            # Extract the best available filename
-            if 'requested_downloads' in info_dict:
-                filename = info_dict['requested_downloads'][0]['filepath']
-            else:
-                filename = ydl.prepare_filename(info_dict)
+            # Ensure we get the correct filename
+            filename = ydl.prepare_filename(info_dict)
+            if not filename.endswith(".mp4"):
+                filename = filename.rsplit(".", 1)[0] + ".mp4"  # Rename to .mp4 if needed
 
         filename_only = os.path.basename(filename)
         download_url = url_for('get_video', filename=filename_only, _external=True)
