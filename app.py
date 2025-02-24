@@ -26,22 +26,12 @@ def download_video():
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
+         # yt-dlp options with cookies
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]',  # Best video + best audio in MP4
-            'merge_output_format': 'mp4',  # Ensure final format is MP4
-            'postprocessors': [
-                {
-                    'key': 'FFmpegMerger',  # Merges video and audio
-                },
-                {
-                    'key': 'FFmpegVideoRemuxer',  # Ensures MP4 container format
-                    'preferredformat': 'mp4',  # Ensure MP4 output
-                }
-            ],
-            'postprocessor_args': ['-c:v', 'copy', '-c:a', 'aac', '-strict', 'experimental'],  # Audio encoding fix
-            'cookiefile': 'cookies.txt',  # Use cookies to bypass YouTube restrictions
-            'noplaylist': True  # Ensure only a single video is downloaded
+            'format': 'best[ext=mp4]/best',
+            'postprocessors': [],
+            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
 
 
