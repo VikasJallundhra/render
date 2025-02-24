@@ -28,9 +28,12 @@ def download_video():
 
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'best[ext=mp4]/best',
-            'postprocessors': [],
-            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
+           'format': 'bestvideo+bestaudio/best',  # Best video and best audio merged
+            'merge_output_format': 'mp4',  # Ensure MP4 format
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',  # Convert to MP4 if necessary
+            }],
         }
 
 
