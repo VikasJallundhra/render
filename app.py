@@ -19,29 +19,23 @@ def download_video():
     if not url:
         return jsonify({"error": "URL is required"}), 400
 
-    if "youtube.com" not in url and "youtu.be" not in url:
-        return jsonify({"error": "Invalid YouTube URL"}), 400
-
     try:
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-         # yt-dlp options with cookies
+        # yt-dlp options (supports all sites)
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
-            'postprocessors': [],
-            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',  # Best video & audio
+            'merge_output_format': 'mp4',  # Ensure MP4 output
+            'postprocessors': [{'key': 'FFmpegMerger'}],  # Merge video & audio
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,  # Use cookies if available
+            'noplaylist': True  # Prevent downloading full playlists
         }
-
-
-
-
-        
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
-            
+
             # Extract the best available filename
             if 'requested_downloads' in info_dict:
                 filename = info_dict['requested_downloads'][0]['filepath']
