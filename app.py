@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import yt_dlp
+import os  # ✅ Fixed missing import
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -15,13 +16,13 @@ def get_download_url():
 
     try:
         ydl_opts = {
-            'format': 'bv+ba/best',  # Best video + best audio
-            'noplaylist': True,  # Prevent playlist downloads
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,  # Use cookies if available
+            'format': 'bv+ba/best',  # ✅ Best video + best audio
+            'noplaylist': True,  # ✅ Prevent downloading playlists
+            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,  # ✅ Use cookies if available
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=False)  # Don't download, just get info
+            info_dict = ydl.extract_info(url, download=False)  # ✅ Extract video info without downloading
 
             if 'url' in info_dict:
                 video_url = info_dict['url']
