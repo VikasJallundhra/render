@@ -3,7 +3,6 @@ import yt_dlp
 import os
 import uuid
 from flask_cors import CORS
-import gunicorn
 
 app = Flask(__name__)
 CORS(app)
@@ -23,14 +22,15 @@ def download_video():
 
     try:
         # Generate a unique filename
-        unique_id = str(uuid.uuid4())[:8]  # Generates a short unique identifier
+        unique_id = str(uuid.uuid4())[:8]  # Short unique identifier
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        # Set yt-dlp options to download a single MP4 file
+        # yt-dlp options with cookies
         ydl_opts = {
-            'outtmpl': filename_template,
+            'outtmpl': filename_template,  # Save format
             'format': 'best[ext=mp4]/best',
-            'postprocessors': []
+            'postprocessors': [],
+            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
