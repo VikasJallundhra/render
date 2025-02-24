@@ -34,6 +34,7 @@ def download_video():
                 'key': 'FFmpegVideoConvertor',
                 'preferedformat': 'mp4',  # Convert to MP4 if necessary
             }],
+            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
 
 
