@@ -26,12 +26,13 @@ def download_video():
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        ydl_opts = {
-            'outtmpl': filename_template,  # Save format
-            'format': 'bv*+ba/best',  # Best quality video & audio
-            'merge_output_format': 'mp4',  # Ensure MP4 format
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None
-        }
+        'format': 'bestvideo+bestaudio/best',  # Best video and best audio merged
+        'merge_output_format': 'mp4',  # Ensure MP4 format
+        'postprocessors': [{
+            'key': 'FFmpegVideoConvertor',
+            'preferedformat': 'mp4',  # Convert to MP4 if necessary
+        }],
+        
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
