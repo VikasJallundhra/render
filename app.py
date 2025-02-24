@@ -26,12 +26,18 @@ def download_video():
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        'format': 'bestvideo+bestaudio/best',  # Best video and best audio merged
-        'merge_output_format': 'mp4',  # Ensure MP4 format
-        'postprocessors': [{
-            'key': 'FFmpegVideoConvertor',
-            'preferedformat': 'mp4',  # Convert to MP4 if necessary
-        }],
+        ydl_opts = {
+            'outtmpl': filename_template,  # Save format
+            'format': 'bestvideo+bestaudio/best',  # Ensure best video and audio are merged
+            'merge_output_format': 'mp4',  # Merge output as MP4
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',  # Convert to MP4 if necessary
+            }],
+            'postprocessor_args': ['-c:v', 'copy', '-c:a', 'aac'],  # Ensure proper audio encoding
+            'cookiesfrombrowser': ('chrome',)  # Use Chrome cookies to handle restricted content
+        }
+
         
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
