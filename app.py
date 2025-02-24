@@ -11,6 +11,7 @@ DOWNLOAD_FOLDER = "downloads"
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 app.config['DOWNLOAD_FOLDER'] = DOWNLOAD_FOLDER
 
+
 @app.route('/download', methods=['POST'])
 def download_video():
     data = request.json
@@ -19,30 +20,29 @@ def download_video():
     if not url:
         return jsonify({"error": "URL is required"}), 400
 
+    if "youtube.com" not in url and "youtu.be" not in url:
+        return jsonify({"error": "Invalid YouTube URL"}), 400
+
     try:
         unique_id = str(uuid.uuid4())[:8]
         filename_template = f"{DOWNLOAD_FOLDER}/%(title)s-{unique_id}.%(ext)s"
 
-        # yt-dlp options (supports all platforms)
+        # yt-dlp options with cookies
         ydl_opts = {
             'outtmpl': filename_template,  # Save format
-            'format': 'bv+ba/best[ext=mp4]',  # Best video + audio merged
-            'merge_output_format': 'mp4',  # Ensure MP4 format
-            'postprocessors': [{
-                'key': 'FFmpegMerger',  # Ensure merging of video & audio
-                'when': 'downloading'
-            }],
-            'cookiefile': 'cookies.txt' if os.path.exists('cookies.txt') else None,  # Use cookies if available
-            'noplaylist': True  # Prevent full playlist downloads
+            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
+            'postprocessors': [],
+            'cookiefile': 'cookies.txt'  # Use cookies to bypass YouTube restrictions
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
 
-            # Ensure we get the correct filename
-            filename = ydl.prepare_filename(info_dict)
-            if not filename.endswith(".mp4"):
-                filename = filename.rsplit(".", 1)[0] + ".mp4"  # Rename to .mp4 if needed
+            # Extract the best available filename
+            if 'requested_downloads' in info_dict:
+                filename = info_dict['requested_downloads'][0]['filepath']
+            else:
+                filename = ydl.prepare_filename(info_dict)
 
         filename_only = os.path.basename(filename)
         download_url = url_for('get_video', filename=filename_only, _external=True)
@@ -52,9 +52,11 @@ def download_video():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/get_video/<filename>', methods=['GET'])
 def get_video(filename):
     return send_from_directory(app.config['DOWNLOAD_FOLDER'], filename, as_attachment=True)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
